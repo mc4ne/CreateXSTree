@@ -87,9 +87,9 @@ private:
     float  nu,Q2,W,xbj;
     //rate
 
-    float p_rate_he3, p_rate_ge180, p_rate_c12, p_rate_n2, p_spec, p_accept, th_accept, ph_accept, dens_he3, dens_ge180, dens_c12, dens_n2, tar_len_ge180, tar_len_he3, tar_len_c12, tar_len_n2, n_trials;
+    float p_rate_he3, p_rate_ge180, p_rate_up, p_rate_down, p_rate_c12, p_rate_n2, p_spec, p_accept, th_accept, ph_accept, dens_he3, dens_ge180, dens_c12, dens_n2, tar_len_ge180, tar_len_up, tar_len_down, tar_len_he3, tar_len_c12, tar_len_n2, n_trials;
     //yield
-    float  p_yield_he3, p_yield_ge180, p_yield_c12, p_yield_n2, beam_curr;
+    float  p_yield_he3, p_yield_ge180, p_yield_up, p_yield_down, p_yield_c12, p_yield_n2, beam_curr;
 
     //-----------------------------block3 end  -------------------------
 
