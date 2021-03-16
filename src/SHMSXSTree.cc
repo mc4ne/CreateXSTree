@@ -251,8 +251,8 @@ void SHMSXSTree::Run(int nevents_to_process)
       ph_accept = (70.0+abs(-70.0))/1000.0;
       n_trials=1000000.0;
       tar_len_ge180=0.015;
-      tar_len_up=0.01382; //upstream window
-      tar_len_down=0.01009;//downstream window
+      tar_len_up=0.01009; //upstream window
+      tar_len_down=0.01382;//downstream window
       tar_len_he3=40.0;
       tar_len_c12=0.0254;
       tar_len_n2=9.0;
