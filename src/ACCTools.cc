@@ -19,6 +19,31 @@ namespace ACCEPTANCE {
       str.erase(found,key.length());
     }
   }
+  
+  //remove leading and trailing spaces
+  std::string trim(const std::string& str, const std::string& whitespace)
+  {
+    std::size_t strBegin = str.find_first_not_of(whitespace);
+    if (strBegin == std::string::npos)
+        return ""; // no content
+
+    std::size_t strEnd = str.find_last_not_of(whitespace);
+
+    return str.substr(strBegin, strEnd - strBegin + 1);
+  }
+  
+  //check is file path is vaild or not, return 1 if valid, 0 for invalid
+  int AccessFilePath(const char* filename)
+  {
+    std::ifstream ifs(filename);
+    
+    if (!ifs.is_open()) {
+      //std::cout<<"file \""<<filename<<"\" does not exist...\n";
+      return 0;
+    }
+    ifs.close();
+    return 1;
+  }
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
   void CreateQ2Table(double Q2Table[])

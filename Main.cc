@@ -201,8 +201,9 @@ int extractacc_main(int argc, char** argv)
 {
   if(argc<3) {
     cout<<" Error: you need to provide 3 arguments!\n"
-        <<" Usage: "<<argv[0]<<"  <pDetector=1 HMS|2 SHMS> <pType=1|2> <rootfile>\n"
+        <<" Usage: "<<argv[0]<<"  <pDetector=1 HMS|2 SHMS> <pType=1|2> <infile>\n"
         <<"        pType=2 means only 2 SC bars are turned on\n"
+        <<"        infile is a txt file that list the absolute path of all source root files"
         <<endl;
     exit(-1);
   }
@@ -225,12 +226,13 @@ int main(int argc, char** argv)
         <<"       task==a1nrate:    get all A1N rates for all kinematic points \n"
         <<"       task==extractacc: extract HMS or SHMS acceptance \n"
         <<"       task==xstree:     add xs branches into mc-signle-arm output ntuple \n"
-        <<"       task==getrate1:    get rate for one single kinematics point using method 1\n"
-        <<"       task==getrate2:    get rate for given xstree_file using method 2\n"
-        <<"       task==a1noptics:   get all A1N optics rates for all kinematic points \n"
+        <<"       task==getrate1:   get rate for one single kinematics point using method 1\n"
+        <<"       task==getrate2:   get rate for given xstree_file using method 2\n"
+        <<"       task==a1noptics:  get all A1N optics rates for all kinematic points \n"
         <<"       task==getopticsrate: get rates for each C12 foil for given kinematic\n"
         <<endl
         <<"       For details of 'other_arguments' in each task, type 'help' after that task \n"
+        <<"       For example: "<<argv[0]<<" extractacc help \n"
         <<endl;
     exit(-1);
   }

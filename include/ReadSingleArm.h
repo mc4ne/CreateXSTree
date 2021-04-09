@@ -69,6 +69,7 @@ class ReadSingleArm {
   TBranch        *b_vyi;   //!
   TBranch        *b_vzi;   //!
 
+  ReadSingleArm();
   ReadSingleArm(const char* filename, int hms_or_shms);
   virtual ~ReadSingleArm();
   virtual Int_t    Cut(Long64_t entry);
@@ -83,6 +84,10 @@ class ReadSingleArm {
 #endif
 
 #ifdef ReadSingleArm_cxx
+ReadSingleArm::ReadSingleArm()
+{
+  //do nothing
+}
 ReadSingleArm::ReadSingleArm(const char* filename, int hms_or_shms)
 {
   // if parameter tree is not specified (or zero), connect the file

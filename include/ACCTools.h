@@ -55,6 +55,10 @@ namespace ACCEPTANCE {
   double * CalculateACC(int *N_det, int *N_true, int bin1);
 
   void RemoveAll(std::string str, std::string key);
+  //remove leading and trailing spaces
+  std::string trim(const std::string& str, const std::string& whitespace = " \t");
+  //check is file path is vaild or not, return 1 if valid, 0 for invalid
+  int AccessFilePath(const char* filename);
 
   /////////////////////////////////////////////////////////////////////////////
 

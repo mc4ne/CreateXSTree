@@ -1,12 +1,17 @@
 //implement of  ExtractAcceptance class-
+#include <iostream>
+#include <fstream>
+#include <string>
 
 #include "ExtractAcceptance.h"
 #include "ACCInc.h"
 #include "ACCTools.h"
 #include <math.h>
 
+using namespace std;
+
 ExtractAcceptance::ExtractAcceptance(const char* filename, int det, int type):
-  ReadSingleArm(filename,det),mDet(det),mType(type)
+  mDet(det),mType(type)
 {
 #ifdef ExtractAcceptance_Debug 
   if(ExtractAcceptance_Debug>=4) 
@@ -27,6 +32,8 @@ ExtractAcceptance::ExtractAcceptance(const char* filename, int det, int type):
   N_Inc   =ACCEPTANCE::IniDynamicArray(bin1,bin2,bin3,bin4,iDefVal);
   N_Inc_true=ACCEPTANCE::IniDynamicArray(bin1,bin2,bin3,bin4,iDefVal);
   Acc_Inc   =ACCEPTANCE::IniDynamicArray(bin1,bin2,bin3,bin4,dDefVal);
+
+  CreateFileList(filename);
 }
 
 
@@ -41,6 +48,49 @@ ExtractAcceptance::~ExtractAcceptance()
   ACCEPTANCE::FreeDynArray(Acc_Inc,bin1,bin2,bin3);
 }
 
+//read the content of the given file and store it into the vector
+void ExtractAcceptance::CreateFileList(const char* filename)
+{
+#ifdef ExtractAcceptance_Debug 
+  if(ExtractAcceptance_Debug>=4) cout<<"ExtractAcceptance::CreateFileList()"<<endl;
+#endif
+
+  if(ACCEPTANCE::AccessFilePath(filename) == 0) {
+    cout<<"ExtractAcceptance::CreateFileList(): inputfile \""<<filename<<"\" does not exist, I quit...\n";
+    exit(-2);
+  }
+  
+  std::ifstream ifs(filename);
+  
+  string tmpStr0;
+  string tmpStr;
+  while (ifs.good()) {
+    ifs>>tmpStr0;
+
+    //remove leading and trailing spaces
+    tmpStr=ACCEPTANCE::trim(tmpStr0);
+
+    //ignore this line if it starts with #
+    size_t found = tmpStr.find_first_of("#");
+    if (found != std::string::npos) {
+      //found it, truncate the string
+      if(found == 0)  continue;
+      else tmpStr = tmpStr.substr(0, found);
+    }
+
+    if(ACCEPTANCE::AccessFilePath(tmpStr.c_str())) {
+      mVFileList.push_back(tmpStr);
+    }
+  }
+  ifs.close();
+
+  //debug: show the list
+  cout<<"Here is the source root file list: \n";
+  for(int i=0;i<mVFileList.size();i++) {
+    cout<<mVFileList[i]<<endl;
+  }
+  return;
+}
 
 void ExtractAcceptance::BeginOfRun()
 {
@@ -48,7 +98,6 @@ void ExtractAcceptance::BeginOfRun()
 #ifdef ExtractAcceptance_Debug 
   if(ExtractAcceptance_Debug>=4) cout<<"ExtractAcceptance::BeginOfRun()"<<endl;
 #endif
- 
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -71,41 +120,50 @@ void ExtractAcceptance::Run()
   if(ExtractAcceptance_Debug>=4) cout<<" ExtractAcceptance::Run() "<<endl;
 #endif
 
-  Long64_t nentries = fChain->GetEntriesFast();
+  for(int i=0;i<mVFileList.size();i++) {
+    
+    ReadSingleArm(mVFileList[i].c_str(),mDet);
+    cout<<" ExtractAcceptance::Run() is processing file "<<fChain->GetCurrentFile()<<" ... \n";
+    
+    Long64_t nentries = fChain->GetEntriesFast();
 #ifdef ExtractAcceptance_Debug 
-  if(ExtractAcceptance_Debug>=6) nentries=1000;
+    if(ExtractAcceptance_Debug>=6) nentries=1000;
 #endif
 
-  for (Long64_t jentry=0; jentry<nentries;jentry++) {
+    for (Long64_t jentry=0; jentry<nentries;jentry++) {
 #ifdef ExtractAcceptance_Debug 
-    if(ExtractAcceptance_Debug>=5)
-      cout<<" ExtractAcceptance::Run() is processing event "<<std::setw(6)<<jentry<<"\n";
+      if(ExtractAcceptance_Debug>=5)
+        cout<<" ExtractAcceptance::Run() is processing event "<<std::setw(6)<<jentry<<"\n";
 #endif
 
 #ifdef ExtractAcceptance_Debug 
-    if( ((jentry+1)%10000) == 0)
-      cout<<" ExtractAcceptance::Run() is processing event "<<std::setw(6)<<jentry+1<<" ... \r";
+      if( ((jentry+1)%10000) == 0)
+        cout<<" ExtractAcceptance::Run() is processing event "<<std::setw(6)<<jentry+1<<" ... \r";
 #endif
-    Long64_t ientry = LoadTree(jentry);
-    if (ientry < 0) break;
-    fChain->GetEntry(jentry);
+      Long64_t ientry = LoadTree(jentry);
+      if (ientry < 0) break;
+      fChain->GetEntry(jentry);
 
-    //apply cuts
-    //if(stop_id && stop_id<100) continue;
-      
-    if(ACCEPTANCE::GetIndex(psytari,psdeltai,psxptari,psyptari,iYtarIdx,iDeltaIdx,iThetaIdx,iPhiIdx)>=0) 
-    {
-      N_Inc_true[iYtarIdx][iDeltaIdx][iThetaIdx][iPhiIdx]++;
-      if(stop_id == 0) {
-        if(mType==1) N_Inc[iYtarIdx][iDeltaIdx][iThetaIdx][iPhiIdx]++;
-        else {
-          if( mType==2 && fabs(psxfp)<8.0) N_Inc[iYtarIdx][iDeltaIdx][iThetaIdx][iPhiIdx]++;
+      //apply cuts
+      //if(stop_id && stop_id<100) continue;
+        
+      if(ACCEPTANCE::GetIndex(psytari,psdeltai,psxptari,psyptari,iYtarIdx,iDeltaIdx,iThetaIdx,iPhiIdx)>=0) 
+      {
+        N_Inc_true[iYtarIdx][iDeltaIdx][iThetaIdx][iPhiIdx]++;
+        if(stop_id == 0) {
+          //apply your extra cuts here ...
+          if(mType==1) N_Inc[iYtarIdx][iDeltaIdx][iThetaIdx][iPhiIdx]++;
+          else {
+            if( mType==2 && fabs(psxfp)<8.0) N_Inc[iYtarIdx][iDeltaIdx][iThetaIdx][iPhiIdx]++;
+          }
         }
       }
+      
     }
-    
+
+    //empty the memory for next file
+    delete fChain->GetCurrentFile();
   }
-  
   EndOfRun();
   return;
 }
