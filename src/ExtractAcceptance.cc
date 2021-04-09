@@ -64,7 +64,8 @@ void ExtractAcceptance::CreateFileList(const char* filename)
   
   string tmpStr0;
   string tmpStr;
-  while (ifs.good()) {
+  while (!ifs.eof()) {
+    tmpStr0.clear();   //empty the string
     ifs>>tmpStr0;
 
     //remove leading and trailing spaces
@@ -77,6 +78,7 @@ void ExtractAcceptance::CreateFileList(const char* filename)
       if(found == 0)  continue;
       else tmpStr = tmpStr.substr(0, found);
     }
+    if(tmpStr.length() < 1)  continue;
 
     if(ACCEPTANCE::AccessFilePath(tmpStr.c_str())) {
       mVFileList.push_back(tmpStr);
@@ -84,6 +86,11 @@ void ExtractAcceptance::CreateFileList(const char* filename)
   }
   ifs.close();
 
+  if(mVFileList.size()<1) {
+    cout<<"ExtractAcceptance::CreateFileList(): no valid input root files, I quit...\n";
+    exit(-2);    
+  }
+  
   //debug: show the list
   cout<<"Here is the source root file list: \n";
   for(int i=0;i<mVFileList.size();i++) {
@@ -122,8 +129,12 @@ void ExtractAcceptance::Run()
 
   for(int i=0;i<mVFileList.size();i++) {
     
-    ReadSingleArm(mVFileList[i].c_str(),mDet);
-    cout<<" ExtractAcceptance::Run() is processing file "<<fChain->GetCurrentFile()<<" ... \n";
+    LoadAFile(mVFileList[i].c_str(),mDet);
+    
+    if(!fChain) {
+      cout<<"Warning! Something wrong in ReadSingleArm::LoadAFile(), fChain is NULL...\n";
+      continue; //exit(-1);
+    }
     
     Long64_t nentries = fChain->GetEntriesFast();
 #ifdef ExtractAcceptance_Debug 
@@ -133,7 +144,7 @@ void ExtractAcceptance::Run()
     for (Long64_t jentry=0; jentry<nentries;jentry++) {
 #ifdef ExtractAcceptance_Debug 
       if(ExtractAcceptance_Debug>=5)
-        cout<<" ExtractAcceptance::Run() is processing event "<<std::setw(6)<<jentry<<"\n";
+        cout<<" ExtractAcceptance::Run() is processing event "<<std::setw(6)<<jentry+1<<"\n";
 #endif
 
 #ifdef ExtractAcceptance_Debug 
@@ -163,6 +174,8 @@ void ExtractAcceptance::Run()
 
     //empty the memory for next file
     delete fChain->GetCurrentFile();
+    
+    cout<<endl;
   }
   EndOfRun();
   return;

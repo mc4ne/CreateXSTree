@@ -38,7 +38,7 @@ namespace ACCEPTANCE {
     std::ifstream ifs(filename);
     
     if (!ifs.is_open()) {
-      //std::cout<<"file \""<<filename<<"\" does not exist...\n";
+      std::cout<<"file \""<<filename<<"\" does not exist...\n";
       return 0;
     }
     ifs.close();

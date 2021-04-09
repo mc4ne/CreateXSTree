@@ -7,10 +7,11 @@
 
 #ifndef ReadSingleArm_h
 #define ReadSingleArm_h
-
+#include <iostream>
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
+using namespace std;
 
 class ReadSingleArm {
  public :
@@ -72,6 +73,7 @@ class ReadSingleArm {
   ReadSingleArm();
   ReadSingleArm(const char* filename, int hms_or_shms);
   virtual ~ReadSingleArm();
+  void LoadAFile(const char* filename, int hms_or_shms);
   virtual Int_t    Cut(Long64_t entry);
   virtual Int_t    GetEntry(Long64_t entry);
   virtual Long64_t LoadTree(Long64_t entry);
@@ -86,20 +88,29 @@ class ReadSingleArm {
 #ifdef ReadSingleArm_cxx
 ReadSingleArm::ReadSingleArm()
 {
+  fChain=0;
   //do nothing
 }
+
 ReadSingleArm::ReadSingleArm(const char* filename, int hms_or_shms)
 {
   // if parameter tree is not specified (or zero), connect the file
   // used to generate this class and read the Tree. 
   TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(filename);
   if (!f) {
+    cout<<"ReadSingleArm() open file \""<<filename<<"\" to read ...\n";
     f = new TFile(filename);
   }
   TTree* tree = 0;
-  if(hms_or_shms==1) tree = (TTree*)gDirectory->Get("h1");
-  else tree = (TTree*)gDirectory->Get("h1411");
-
+  if(hms_or_shms==1) {
+    tree = (TTree*)gDirectory->Get("h1");
+    if(!tree) cout<<"could not find h1 tree in this file \""<<filename<<"\".\n";
+  }
+  else {
+    tree = (TTree*)gDirectory->Get("h1411");
+    if(!tree) cout<<"could not find h1411 tree in this file \""<<filename<<"\".\n";
+  }
+  
   Init(tree,hms_or_shms);
 }
 
@@ -109,12 +120,35 @@ ReadSingleArm::~ReadSingleArm()
   delete fChain->GetCurrentFile();
 }
 
+void ReadSingleArm::LoadAFile(const char* filename, int hms_or_shms)
+{
+  // if parameter tree is not specified (or zero), connect the file
+  // used to generate this class and read the Tree. 
+  TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(filename);
+  if (!f) {
+    cout<<"ReadSingleArm::LoadAFile() open file \""<<filename<<"\" to read ...\n";
+    f = new TFile(filename);
+  }
+  TTree* tree = 0;
+  if(hms_or_shms==1) {
+    tree = (TTree*)gDirectory->Get("h1");
+    if(!tree) cout<<"could not find h1 tree in this file \""<<filename<<"\".\n";
+  }
+  else {
+    tree = (TTree*)gDirectory->Get("h1411");
+    if(!tree) cout<<"could not find h1411 tree in this file \""<<filename<<"\".\n";
+  }
+  
+  Init(tree,hms_or_shms);
+}
+
 Int_t ReadSingleArm::GetEntry(Long64_t entry)
 {
   // Read contents of entry.
   if (!fChain) return 0;
   return fChain->GetEntry(entry);
 }
+
 Long64_t ReadSingleArm::LoadTree(Long64_t entry)
 {
   // Set the environment to read one entry
@@ -189,6 +223,7 @@ void ReadSingleArm::Init(TTree *tree, int hms_or_shms)
   fChain->SetBranchAddress("vyi", &vyi, &b_vyi);
   fChain->SetBranchAddress("vzi", &vzi, &b_vzi);
   Notify();
+  //cout<<"ReadSingleArm()::Init():  all is good! Number of Event is "<<fChain->GetEntries()<<"\n";
 }
 
 Bool_t ReadSingleArm::Notify()
@@ -209,6 +244,7 @@ void ReadSingleArm::Show(Long64_t entry)
   if (!fChain) return;
   fChain->Show(entry);
 }
+
 Int_t ReadSingleArm::Cut(Long64_t entry)
 {
   // This function may be called from Loop.
@@ -216,4 +252,5 @@ Int_t ReadSingleArm::Cut(Long64_t entry)
   // returns -1 otherwise.
   return 1;
 }
+
 #endif // #ifdef ReadSingleArm_cxx

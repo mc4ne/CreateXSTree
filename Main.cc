@@ -25,7 +25,7 @@ extern void GetRate(double pBeamCurrent_uA, double pBeamE_GeV, double pDetectorA
 
 int getopticsrate_main(int argc, char** argv)
 {
-  if(argc<5) {
+  if(argc<6) {
   cout<<" Error: you need to provide at least 5 arguments!\n"
       <<" Calculate rates using method 1.\n"
       <<" Usage: "<<argv[0]<<" <BeamCurrent_uA> <Beam_GeV> <DetectorAngle_deg> <DetectorMomentum_GeV> <DetectorName=HMS|SHMS> [ElasOnly=0]\n"
@@ -49,7 +49,7 @@ int getopticsrate_main(int argc, char** argv)
   pDetectorMomentum = atof(argv[4]); 
   pDetectorName = argv[5];
   int pElasOnly = 0;
-  if(argc>=6) pElasOnly = atol(argv[6]); 
+  if(argc>6) pElasOnly = atol(argv[6]); 
   
   cout<<"  Beam="<<pBeamE<<"  DetAngle="<<pDetectorAngle/degree<<"  pDetectorMomentum="<<pDetectorMomentum<<endl;
 
@@ -60,7 +60,7 @@ int getopticsrate_main(int argc, char** argv)
 
 int getrate1_main(int argc, char** argv)
 {
-  if(argc<5) {
+  if(argc<6) {
   cout<<" Error: you need to provide at least 5 arguments!\n"
       <<" Calculate rates using method 1.\n"
       <<" Usage: "<<argv[0]<<" <BeamCurrent_uA> <Beam_GeV> <DetectorAngle_deg> <DetectorMomentum_GeV> <DetectorName=HMS|SHMS> [ElasOnly=0]\n"
@@ -86,7 +86,7 @@ int getrate1_main(int argc, char** argv)
   pDetectorMomentum = atof(argv[4]); 
   pDetectorName = argv[5];
   int pElasOnly = 0;
-  if(argc>=6) pElasOnly = atol(argv[6]); 
+  if(argc>6) pElasOnly = atol(argv[6]); 
   
   cout<<"  Beam="<<pBeamE<<"  DetAngle="<<pDetectorAngle/degree<<"  pDetectorMomentum="<<pDetectorMomentum<<endl;
 
@@ -96,7 +96,7 @@ int getrate1_main(int argc, char** argv)
 
 int getrate2_main(int argc, char** argv)
 {
-  if(argc<5) {
+  if(argc<8) {
   cout<<" Error: you need to provide 7 arguments!\n"
       <<" Calculate rates using method 2.\n"
       <<" Usage: "<<argv[0]<<" <BeamCurrent_uA> <Beam_GeV> <DetectorAngle_deg> <DetectorMomentum_GeV> <Detector=1 HMS|2 SHMS> <FullAcceptance=0|1> <xstree_file>\n"
@@ -199,7 +199,7 @@ int xstree_main(int argc, char** argv)
 
 int extractacc_main(int argc, char** argv)
 {
-  if(argc<3) {
+  if(argc<4) {
     cout<<" Error: you need to provide 3 arguments!\n"
         <<" Usage: "<<argv[0]<<"  <pDetector=1 HMS|2 SHMS> <pType=1|2> <infile>\n"
         <<"        pType=2 means only 2 SC bars are turned on\n"
