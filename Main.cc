@@ -236,7 +236,7 @@ int extractacc_main(int argc, char** argv)
   std::vector<std::thread> threadObj;
   for (int i = 0; i < nthread; i++) {
     threadObj.push_back(std::thread(&ExtractAcceptance::Run, pAcc[i]));
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));  //wait 500ms to avoid unknown problems
   }
 
   //synchronize threads:
