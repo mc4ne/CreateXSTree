@@ -11,7 +11,7 @@
 using namespace std;
 
 ExtractAcceptance::ExtractAcceptance(const char* filename, int det, int type, int tid, int nthread):
-  mDet(det),mType(type),mThreadID(tid),mTotalThread(nthread)
+  mThreadID(tid),mTotalThread(nthread),mDet(det),mType(type)
 {
 #ifdef ExtractAcceptance_Debug 
   if(ExtractAcceptance_Debug>=4) 

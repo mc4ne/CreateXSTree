@@ -50,7 +50,7 @@ else
     MODE    := -m64
 endif
 INCDIRS     := $(patsubst %,-I%,$(subst :, ,$(INCDIR)))
-CFLAGS      := -Wall -fPIC -O3 -g -std=c++11 $(MODE) $(INCDIRS)
+CFLAGS      := -Wall -fPIC -O3 -g  $(MODE) $(INCDIRS)
 CXXFLAGS    := -Wall -fPIC -O3 -g -std=c++11 $(MODE) $(INCDIRS) 
 FFLAGS      := -Wall -fPIC -O3 -g $(MODE) $(INCDIRS)
 ifeq ($(MYOS),Darwin) 
@@ -83,7 +83,7 @@ DEPS        := $(subst .o,.d,$(OBJS))
 
 ########################################################################
 # Libs
-SYSLIBS     := -lstdc++ -lgfortran -pthread
+SYSLIBS     := -lstdc++ -lgfortran
 OTHERLIBS   := $(MODELLIBS)
 
 ########################################################################
@@ -191,8 +191,8 @@ lib: dir $(OBJS) $(OBJDIR)/$(USERDICT).o
 
 
 $(USERDICT).cxx: $(HEADERS) $(LIBNAME)_LinkDef.h
-		@echo "Generating dictionary $(USERDICT).cxx ......"
-		@$(ROOTSYS)/bin/rootcint -f $@ -c $(CXXFLAGS) $^
+	@echo "Generating dictionary $(USERDICT).cxx ......"
+	@$(ROOTSYS)/bin/rootcint -f $@ -c $(CFLAGS) $(ROOTCFLAGS) $^
 
 $(OBJDIR)/$(USERDICT).o: $(USERDICT).cxx
 	@echo Compiling $< ......
