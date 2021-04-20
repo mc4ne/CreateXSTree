@@ -8,7 +8,7 @@
 #include <string>
 #include "ReadSingleArm.h"
 
-#define ExtractAcceptance_Debug 0
+//#define ExtractAcceptance_Debug 0
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
 class ExtractAcceptance:public ReadSingleArm
 {

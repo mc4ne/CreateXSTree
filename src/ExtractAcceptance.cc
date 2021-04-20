@@ -93,9 +93,11 @@ void ExtractAcceptance::CreateFileList(const char* filename)
   }
   
   //debug: show the list
-  cout<<"Here is the source root file list: \n";
-  for(int i=0;i<mVFileList.size();i++) {
-    cout<<mVFileList[i]<<endl;
+  if(mThreadID==0) {
+    cout<<"Here is the source root file list: \n";
+    for(int i=0;i<mVFileList.size();i++) {
+      cout<<mVFileList[i]<<endl;
+    }
   }
   return;
 }
@@ -150,8 +152,8 @@ void ExtractAcceptance::Run()
 #endif
 
 #ifdef ExtractAcceptance_Debug 
-      if( ((jentry+1)%10000) == 0)
-        cout<<" ExtractAcceptance::Run() is processing event "<<std::setw(6)<<jentry+1<<" ... \r";
+      if( ((jentry+1)%100000) == 0)
+        cout<<" ExtractAcceptance::Run(): thread "<<mThreadID<<" is processing event "<<std::setw(6)<<jentry+1<<" ... \r";
 #endif
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
