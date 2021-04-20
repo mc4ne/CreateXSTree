@@ -5,6 +5,10 @@
 #include <iomanip>
 #include <math.h>
 #include <time.h>
+#include <thread>
+#include <vector>
+#include <chrono>
+
 
 //#define RATES_DEBUG 1
 
@@ -14,6 +18,7 @@ using namespace std;
 #include "SHMSXSTree.h"
 #include "XSTree.h"
 #include "ExtractAcceptance.h"
+#include "ACCTools.h"
 
 extern double A1NOptics();
 extern double* GetOpticsRate(double pBeamCurrent, double pBeamE, double pDetectorAngle, double pDetectorMomentum, string pDetectorName, int pElasOnly=0);
@@ -201,9 +206,10 @@ int extractacc_main(int argc, char** argv)
 {
   if(argc<4) {
     cout<<" Error: you need to provide 3 arguments!\n"
-        <<" Usage: "<<argv[0]<<"  <pDetector=1 HMS|2 SHMS> <pType=1|2> <infile>\n"
+        <<" Usage: "<<argv[0]<<"  <pDetector=1 HMS|2 SHMS> <pType=1|2> <infile> [nthread=1]\n"
         <<"        pType=2 means only 2 SC bars are turned on\n"
-        <<"        infile is a txt file that list the absolute path of all source root files"
+        <<"        infile is a txt file that list the absolute path of all source root files \n"
+        <<"        nthread is number of threads you want to run with. \n"
         <<endl;
     exit(-1);
   }
@@ -211,9 +217,33 @@ int extractacc_main(int argc, char** argv)
   int pDet = atol(argv[1]);
   int pType = atol(argv[2]);
   TString infile = argv[3];
+  int nthread = 1;
+  if(argc>4) nthread = atol(argv[4]); 
+    
+  std::vector<ExtractAcceptance*> pAcc;
+  for(int i=0;i<nthread;i++) {
+    pAcc.push_back(new ExtractAcceptance(infile.Data(),pDet,pType,i,nthread));
+  }
   
-  ExtractAcceptance* pAcc = new ExtractAcceptance(infile.Data(),pDet,pType);
-  pAcc->Run();
+ //construct thread, it will run immediately
+  std::vector<std::thread> threadObj;
+  for (int i = 0; i < nthread; i++) {
+    threadObj.push_back(std::thread(&ExtractAcceptance::Run, pAcc[i]));
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+  }
+
+  //synchronize threads:
+  for(int i=0;i<nthread;i++) {
+    threadObj[i].join();
+  }
+
+  //now merge all results  
+  for(int i=1;i<nthread;i++) {
+    pAcc[0]->MergeResult(pAcc[1]);
+  }
+  
+  //now create output file
+  pAcc[0]->EndOfRun();
   
   return 0;
 }

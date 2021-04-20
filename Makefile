@@ -50,8 +50,8 @@ else
     MODE    := -m64
 endif
 INCDIRS     := $(patsubst %,-I%,$(subst :, ,$(INCDIR)))
-CFLAGS      := -Wall -fPIC -O3 -g $(MODE) $(INCDIRS)
-CXXFLAGS    := -Wall -fPIC -O3 -g $(MODE) $(INCDIRS) 
+CFLAGS      := -Wall -fPIC -O3 -g -std=c++11 $(MODE) $(INCDIRS)
+CXXFLAGS    := -Wall -fPIC -O3 -g -std=c++11 $(MODE) $(INCDIRS) 
 FFLAGS      := -Wall -fPIC -O3 -g $(MODE) $(INCDIRS)
 ifeq ($(MYOS),Darwin) 
 #in Darwin, do not use -fno-leading-underscore
@@ -83,7 +83,7 @@ DEPS        := $(subst .o,.d,$(OBJS))
 
 ########################################################################
 # Libs
-SYSLIBS     := -lstdc++ -lgfortran
+SYSLIBS     := -lstdc++ -lgfortran -pthread
 OTHERLIBS   := $(MODELLIBS)
 
 ########################################################################

@@ -10,8 +10,8 @@
 
 using namespace std;
 
-ExtractAcceptance::ExtractAcceptance(const char* filename, int det, int type):
-  mDet(det),mType(type)
+ExtractAcceptance::ExtractAcceptance(const char* filename, int det, int type, int tid, int nthread):
+  mDet(det),mType(type),mThreadID(tid),mTotalThread(nthread)
 {
 #ifdef ExtractAcceptance_Debug 
   if(ExtractAcceptance_Debug>=4) 
@@ -21,6 +21,7 @@ ExtractAcceptance::ExtractAcceptance(const char* filename, int det, int type):
 #endif
    
   mDetName = (mDet==1)?"HMS":"SHMS";
+  if(mTotalThread==1)  mThreadID=0;
   
   int bin1=ACCEPTANCE::kYtarBinNum; 
   int bin2=ACCEPTANCE::kDeltaBinNum; 
@@ -127,8 +128,9 @@ void ExtractAcceptance::Run()
   if(ExtractAcceptance_Debug>=4) cout<<" ExtractAcceptance::Run() "<<endl;
 #endif
 
-  for(int i=0;i<mVFileList.size();i++) {
+  for(int i=mThreadID;i<mVFileList.size();i+=mTotalThread) {
     
+    cout<<" Thread \t"<<mThreadID+1<<": ExtractAcceptance::Run()\n\t";
     LoadAFile(mVFileList[i].c_str(),mDet);
     
     if(!fChain) {
@@ -177,7 +179,8 @@ void ExtractAcceptance::Run()
     
     cout<<endl;
   }
-  EndOfRun();
+
+  //EndOfRun();  //since this is multiple thread mode, user need to merge result before calling end of run
   return;
 }
 
@@ -324,6 +327,17 @@ void ExtractAcceptance::Reset()
 {
 }
 
+/////////////////////////////////////////////////////////////////////////////////////
+void ExtractAcceptance::MergeResult(ExtractAcceptance *pAcc)
+{
+  int bin1=ACCEPTANCE::kYtarBinNum;
+  int bin2=ACCEPTANCE::kDeltaBinNum;
+  int bin3=ACCEPTANCE::kThetaBinNum;
+  int bin4=ACCEPTANCE::kPhiBinNum;
+  
+  ACCEPTANCE::AddArrayBToA(N_Inc, pAcc->N_Inc,bin1,bin2,bin3,bin4);
+  ACCEPTANCE::AddArrayBToA(N_Inc_true, pAcc->N_Inc_true,bin1,bin2,bin3,bin4);
+}
 
 /////////////////////////////////////////////////////////////////////////////////////
 void ExtractAcceptance::FillAccTree()

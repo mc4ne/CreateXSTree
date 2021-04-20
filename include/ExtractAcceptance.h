@@ -13,12 +13,14 @@
 class ExtractAcceptance:public ReadSingleArm
 {
 public:
-  ExtractAcceptance(const char* filename, int det, int type=1);
+  ExtractAcceptance(const char* filename, int det, int type=1, int threadid=0, int nthread=1);
   virtual ~ExtractAcceptance();
+  ///////////////////////////////////////////////////////////////////////////
 
   void  BeginOfRun();
   void  Run();
   void  EndOfRun();
+  void  MergeResult(ExtractAcceptance *pAcc);
   ///////////////////////////////////////////////////////////////////////////
   
 public:
@@ -38,8 +40,10 @@ private:
   void DoAccCal();
   void PrintACCTable(int level, const char *filename, char *headblock, int ****N_det, int ****N_true);
   void PrintACCTable(int level, const char *filename, char *headblock, double ****N_det, double ****N_true);
+  void SetThreadPara(int threadid, int nthread) {mThreadID=threadid; mTotalThread=nthread;};
 
 private:
+  int mThreadID,mTotalThread;  //thread id and total number of thread, id start from 0
   int mDet,mType;
   std::string mDetName;
   std::vector<std::string> mVFileList; 
