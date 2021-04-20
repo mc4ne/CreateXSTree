@@ -251,12 +251,14 @@ int extractacc_main(int argc, char** argv)
   
   clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end); 
   clock_gettime(CLOCK_MONOTONIC, &wend);
-  cpu_time = (1000.0*end.tv_sec + 1e-6*end.tv_nsec) - (1000.0*start.tv_sec + 1e-6*start.tv_nsec);
-  wall_time = (1000.0*wend.tv_sec + 1e-6*wend.tv_nsec) - (1000.0*wstart.tv_sec + 1e-6*wstart.tv_nsec);
+  cpu_time = (end.tv_sec + 1e-9*end.tv_nsec) - (start.tv_sec + 1e-9*start.tv_nsec);
+  wall_time = (wend.tv_sec + 1e-9*wend.tv_nsec) - (wstart.tv_sec + 1e-9*wstart.tv_nsec);
   cout<<"All threads are done. cpu_time="<<cpu_time<<"s, wall_time="<<wall_time<<"s"<<endl;
   
   //now create output file
+  cout<<"ExtractAccptance() is merging the result and creatint output file ...\n";
   pAcc[0]->EndOfRun();
+  cout<<"done!";
   
   return 0;
 }
