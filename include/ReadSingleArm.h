@@ -98,7 +98,7 @@ ReadSingleArm::ReadSingleArm(const char* filename, int hms_or_shms)
   // used to generate this class and read the Tree. 
   TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(filename);
   if (!f) {
-    cout<<"ReadSingleArm() open file \""<<filename<<"\" to read ...\n";
+    cout<<"ReadSingleArm() is reading file \""<<filename<<"\" ...\n";
     f = new TFile(filename);
   }
   TTree* tree = 0;
@@ -126,7 +126,7 @@ void ReadSingleArm::LoadAFile(const char* filename, int hms_or_shms)
   // used to generate this class and read the Tree. 
   TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(filename);
   if (!f) {
-    cout<<"ReadSingleArm::LoadAFile() open file \""<<filename<<"\" to read ...\n";
+    cout<<"ReadSingleArm::LoadAFile() is reading file \""<<filename<<"\"  ...\n";
     f = new TFile(filename);
   }
   TTree* tree = 0;

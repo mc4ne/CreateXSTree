@@ -219,7 +219,12 @@ int extractacc_main(int argc, char** argv)
   TString infile = argv[3];
   int nthread = 1;
   if(argc>4) nthread = atol(argv[4]); 
-    
+      
+  clock_t start;
+  double cpu_time_used;
+
+  start = clock();
+
   std::vector<ExtractAcceptance*> pAcc;
   for(int i=0;i<nthread;i++) {
     pAcc.push_back(new ExtractAcceptance(infile.Data(),pDet,pType,i,nthread));
@@ -229,7 +234,7 @@ int extractacc_main(int argc, char** argv)
   std::vector<std::thread> threadObj;
   for (int i = 0; i < nthread; i++) {
     threadObj.push_back(std::thread(&ExtractAcceptance::Run, pAcc[i]));
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
   }
 
   //synchronize threads:
@@ -241,6 +246,9 @@ int extractacc_main(int argc, char** argv)
   for(int i=1;i<nthread;i++) {
     pAcc[0]->MergeResult(pAcc[1]);
   }
+  
+  cpu_time_used = ((double) (clock() - start)) / CLOCKS_PER_SEC;
+  cout<<"All threads are done. Time elapsed "<<cpu_time_used<<endl;
   
   //now create output file
   pAcc[0]->EndOfRun();

@@ -132,7 +132,7 @@ void ExtractAcceptance::Run()
 
   for(int i=mThreadID;i<mVFileList.size();i+=mTotalThread) {
     
-    cout<<" Thread \t"<<mThreadID+1<<": ExtractAcceptance::Run()\n\t";
+    cout<<" Thread "<<mThreadID+1<<": ExtractAcceptance::Run()\n\t";
     LoadAFile(mVFileList[i].c_str(),mDet);
     
     if(!fChain) {
@@ -179,7 +179,9 @@ void ExtractAcceptance::Run()
     //empty the memory for next file
     delete fChain->GetCurrentFile();
     
+#ifdef ExtractAcceptance_Debug 
     cout<<endl;
+#endif    
   }
 
   //EndOfRun();  //since this is multiple thread mode, user need to merge result before calling end of run
