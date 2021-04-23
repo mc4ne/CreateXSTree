@@ -232,11 +232,11 @@ int extractacc_main(int argc, char** argv)
     pAcc.push_back(new ExtractAcceptance(infile.Data(),pDet,pType,i,nthread));
   }
   
- //construct thread, it will run immediately
+ //construct thread, it will run immediately, need to wait some time in between threads
   std::vector<std::thread> threadObj;
   for (int i = 0; i < nthread; i++) {
     threadObj.push_back(std::thread(&ExtractAcceptance::Run, pAcc[i]));
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));  //wait 500ms to avoid unknown problems
+    std::this_thread::sleep_for(std::chrono::milliseconds(2000));  //wait 2000ms to avoid unknown problems
   }
 
   //synchronize threads:
@@ -246,7 +246,7 @@ int extractacc_main(int argc, char** argv)
 
   //now merge all results  
   for(int i=1;i<nthread;i++) {
-    pAcc[0]->MergeResult(pAcc[1]);
+    pAcc[0]->MergeResult(pAcc[i]);
   }
   
   clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end); 
@@ -258,7 +258,7 @@ int extractacc_main(int argc, char** argv)
   //now create output file
   cout<<"ExtractAccptance() is merging the result and creatint output file ...\n";
   pAcc[0]->EndOfRun();
-  cout<<"done!";
+  cout<<"done!\n";
   
   return 0;
 }
