@@ -7,8 +7,11 @@
 #include "ACCInc.h"
 #include "ACCTools.h"
 #include <math.h>
+#include <thread>
+#include <mutex>
 
 using namespace std;
+std::mutex gMutex;
 
 ExtractAcceptance::ExtractAcceptance(const char* filename, int det, int type, int tid, int nthread):
   mThreadID(tid),mTotalThread(nthread),mDet(det),mType(type)
@@ -133,7 +136,10 @@ void ExtractAcceptance::Run()
   for(int i=mThreadID;i<mVFileList.size();i+=mTotalThread) {
     
     cout<<" Thread "<<mThreadID+1<<": ExtractAcceptance::Run()\n\t";
+    //#LoadFile will open root tree, I need to place a lock here to avoid segamtation fault
+    gMutex.lock(); 
     LoadAFile(mVFileList[i].c_str(),mDet);
+    gMutex.unlock();
     
     if(!fChain) {
       cout<<"Warning! Something wrong in ReadSingleArm::LoadAFile(), fChain is NULL...\n";
