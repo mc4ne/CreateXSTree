@@ -4,7 +4,8 @@
 #include "XSModel.hh"   //XSModel return DiffXS in ub/MeV-Sr for inelas or ub for elas.
 #include "G2PRand.hh"
 #include <math.h>
-
+#include <iostream>
+#include <fstream>
 ////////////////////////////////////////////////////////////////////////
 SHMSXSTree::SHMSXSTree(const char* filename):
   ReadSHMS(filename)
@@ -99,13 +100,13 @@ void SHMSXSTree::BeginOfRun()
       mTree->Branch("p_rate_he3",&p_rate_he3,"p_rate_he3/F");
       mTree->Branch("p_rate_ge180",&p_rate_ge180,"p_rate_ge180/F");
       mTree->Branch("p_rate_up",&p_rate_up,"p_rate_up/F");
-      mTree->Branch("p_rate_dwon",&p_rate_down,"p_rate_down/F");
+      mTree->Branch("p_rate_down",&p_rate_down,"p_rate_down/F");
       mTree->Branch("p_rate_c12",&p_rate_c12,"p_rate_c12/F");
       mTree->Branch("p_rate_n2",&p_rate_n2,"p_rate_n2/F");
       mTree->Branch("p_yield_he3",&p_yield_he3,"p_yield_he3/F");
       mTree->Branch("p_yield_ge180",&p_yield_ge180,"p_yield_ge180/F");
       mTree->Branch("p_yield_up",&p_yield_up,"p_yield_up/F");
-      mTree->Branch("p_yield_dwon",&p_yield_down,"p_yield_down/F");
+      mTree->Branch("p_yield_down",&p_yield_down,"p_yield_down/F");
       mTree->Branch("p_yield_c12",&p_yield_c12,"p_yield_c12/F");
       mTree->Branch("p_yield_n2",&p_yield_n2,"p_yield_n2/F");
     }
@@ -233,6 +234,8 @@ void SHMSXSTree::Run(int nevents_to_process)
       cout<<" nu="<<nu<<" Q2="<<Q2<<"  W="<<W<<"  xbj="<<xbj<<endl;
     }
 #endif
+     TString Data_file_name;
+     double xtemp, Q2temp,rad_corr_down,rad_corr_up;
     ////////////////////////////////////////////////////////////////
     //This part will be filled if mTreeLevel<2
     //I do not use p and theta because the resolution will sometimes make p>Beam
@@ -245,13 +248,22 @@ void SHMSXSTree::Run(int nevents_to_process)
       xs_14n = GetXS(7,7,mBeam,p0,theta0,0.0,0.0);
       xs_27al = GetXS(13,14,mBeam,p0,theta0,0.0,0.0);
       xs_ge180 = GetXS_GE180(mBeam,p0,theta0,0.0,0.0);
+      //get rad_corr=xs_born/xs_rad from table
+
+  Data_file_name="empty_hms_down_win.dat";
+  xtemp=0.783;
+  Q2temp=10.13;
+  rad_corr_down=Xsec_table_read(Data_file_name,xtemp,Q2temp);
+  Data_file_name="empty_hms_up_win.dat";
+  rad_corr_up=Xsec_table_read(Data_file_name,xtemp,Q2temp);
+
       //rate
       p_accept = (30.0+abs(-20.0))/100.0; 
       th_accept = (80.0+abs(-80.0))/1000.0;
       ph_accept = (70.0+abs(-70.0))/1000.0;
-      n_trials=1000000.0;
+      n_trials=100000.0;
       tar_len_ge180=0.015;
-      tar_len_up=0.01009; //upstream window
+      tar_len_up=0.01009;//upstream window
       tar_len_down=0.01382;//downstream window
       tar_len_he3=40.0;
       tar_len_c12=0.0254;
@@ -264,8 +276,8 @@ void SHMSXSTree::Run(int nevents_to_process)
       beam_curr=30.0;
       p_rate_he3=GetXS(2,1,mBeam,p0,theta0,0.0,0.0)*p_spec*p_accept*th_accept*ph_accept*dens_he3*1e-34*beam_curr*1e-6*tar_len_he3/100.0/(1.6*1e-19*n_trials);
       p_rate_ge180=GetXS_GE180(mBeam,p0,theta0,0.0,0.0)*p_spec*p_accept*th_accept*ph_accept*dens_ge180*1e-34*beam_curr*1e-6*tar_len_ge180/100.0/(1.6*1e-19*n_trials);
-      p_rate_up=GetXS_GE180(mBeam,p0,theta0,0.0,0.0)*p_spec*p_accept*th_accept*ph_accept*dens_ge180*1e-34*beam_curr*1e-6*tar_len_up/100.0/(1.6*1e-19*n_trials);
-      p_rate_down=GetXS_GE180(mBeam,p0,theta0,0.0,0.0)*p_spec*p_accept*th_accept*ph_accept*dens_ge180*1e-34*beam_curr*1e-6*tar_len_down/100.0/(1.6*1e-19*n_trials);
+      p_rate_up=(1.0/rad_corr_temp_up)*GetXS_GE180(mBeam,p0,theta0,0.0,0.0)*p_spec*p_accept*th_accept*ph_accept*dens_ge180*1e-34*beam_curr*1e-6*tar_len_up/100.0/(1.6*1e-19*n_trials);
+      p_rate_down=(1.0/rad_corr_temp_down)*GetXS_GE180(mBeam,p0,theta0,0.0,0.0)*p_spec*p_accept*th_accept*ph_accept*dens_ge180*1e-34*beam_curr*1e-6*tar_len_down/100.0/(1.6*1e-19*n_trials);
       p_rate_c12=GetXS(6,6,mBeam,p0,theta0,0.0,0.0)*p_spec*p_accept*th_accept*ph_accept*dens_c12*1e-34*beam_curr*1e-6*tar_len_c12/100.0/(1.6*1e-19*n_trials);
       p_rate_n2=GetXS(7,7,mBeam,p0,theta0,0.0,0.0)*p_spec*p_accept*th_accept*ph_accept*dens_n2*1e-34*beam_curr*1e-6*tar_len_n2/100.0/(1.6*1e-19*n_trials);
       //yield
@@ -406,6 +418,172 @@ double SHMSXSTree::GetXS_GE180(float Ei, float Ef, float Theta, float Tb, float 
   for(int i=0;i<6;i++) {
     pXs_ge180 += pMolMass_aver_ge180*kGE180_MFraction[i]/kGE180_MMolMass[i]*kGE180_MXs[i];
   }
+
+double SHMSXSTree::Xsec_table_read(TString Data_file_name, double xtemp, double Q2temp )
+{
+  
+const int dim=8000;
+double  xbj_win[dim],Q2_win[dim],rad_corr_win[dim];
+
+double xbj_table,Q2_table,rad_corr;
+
+double rad_corr_temp=1.0;
+double rad_corr_temp1,rad_corr_temp2,rad_corr_temp3,rad_corr_temp4;
+double xbj_diff, xbj_comp;
+double Q2_diff, Q2_comp;
+     
+
+
+double xbj_table_1, Q2_table_1,xbj_table_2, Q2_table_2,xbj_table_3, Q2_table_3, xbj_table_4, Q2_table_4;
+int count_win=0;
+rad_corr_temp1=1.0;
+xbj_comp=1.0;
+Q2_comp=1.0;
+
+ifstream data(Data_file_name,ios_base::in);//load .dat file
+
+while(!data.eof()) //eof for end of file
+      {data>>xbj_table>>Q2_table>>rad_corr;
+        xbj_win[count_win]=xbj_table;
+        Q2_win[count_win]=Q2_table;
+        rad_corr_win[count_win]=rad_corr;
+        count_win++;
+      }
+      
+      
+int i_count_win;
+int c_win_1,c_win_2,c_win_3,c_win_4;
+double  xbj_table_win,Q2_table_win,rad_corr_table_win;  
+i_count_win=0;   
+while(i_count_win<count_win) //eof for end of file
+      { xbj_table_win=xbj_win[i_count_win];
+        Q2_table_win=Q2_win[i_count_win];
+        rad_corr_table_win=rad_corr_win[i_count_win];
+        i_count_win++;
+        xbj_diff=abs(xtemp-xbj_table_win);
+       if (xbj_diff<=xbj_comp ){
+        xbj_comp=xbj_diff;
+        Q2_diff=abs(Q2temp-Q2_table_win);
+        if(Q2_diff<Q2_comp)
+        {Q2_comp=Q2_diff;
+         xbj_table_1=xbj_table_win;
+         Q2_table_1=Q2_table_win; 
+         rad_corr_temp1=rad_corr_table_win;
+         c_win_1=i_count_win-1;//index of nearest grid point,then set row values to zero
+         xbj_win[c_win_1]=0.0;
+         Q2_win[c_win_1]=0.0;
+         rad_corr_win[c_win_1]=0.0;
+         }
+        }
+      }
+      
+i_count_win=0;
+xbj_comp=1.0;
+Q2_comp=1.0; 
+while(i_count_win<count_win) //eof for end of file
+      { xbj_table_win=xbj_win[i_count_win];
+        Q2_table_win=Q2_win[i_count_win];
+        rad_corr_table_win=rad_corr_win[i_count_win];
+        i_count_win++;
+        xbj_diff=abs(xtemp-xbj_table_win);
+       if (xbj_diff<=xbj_comp ){
+        xbj_comp=xbj_diff;
+        Q2_diff=abs(Q2temp-Q2_table_win);
+        if(Q2_diff<Q2_comp)
+        {Q2_comp=Q2_diff;
+         xbj_table_2=xbj_table_win;
+         Q2_table_2=Q2_table_win; 
+         rad_corr_temp2=rad_corr_table_win;
+         c_win_2=i_count_win-1;//index of nearest grid point,then set row values to zero
+         xbj_win[c_win_2]=0.0;
+         Q2_win[c_win_2]=0.0;
+         rad_corr_win[c_win_2]=0.0;
+         }
+        }
+      }
+      
+      
+i_count_win=0;
+xbj_comp=1.0;
+Q2_comp=1.0; 
+while(i_count_win<count_win) //eof for end of file
+      { xbj_table_win=xbj_win[i_count_win];
+        Q2_table_win=Q2_win[i_count_win];
+        rad_corr_table_win=rad_corr_win[i_count_win];
+        i_count_win++;
+        xbj_diff=abs(xtemp-xbj_table_win);
+       if (xbj_diff<=xbj_comp ){
+        xbj_comp=xbj_diff;
+        Q2_diff=abs(Q2temp-Q2_table_win);
+        if(Q2_diff<Q2_comp)
+        {Q2_comp=Q2_diff;
+         xbj_table_3=xbj_table_win;
+         Q2_table_3=Q2_table_win; 
+         rad_corr_temp3=rad_corr_table_win;
+         c_win_3=i_count_win-1;//index of nearest grid point,then set row values to zero
+         xbj_win[c_win_3]=0.0;
+         Q2_win[c_win_3]=0.0;
+         rad_corr_win[c_win_3]=0.0;
+         }
+        }
+      }  
+      
+i_count_win=0;
+xbj_comp=1.0;
+Q2_comp=1.0; 
+while(i_count_win<count_win) //eof for end of file
+      { xbj_table_win=xbj_win[i_count_win];
+        Q2_table_win=Q2_win[i_count_win];
+        rad_corr_table_win=rad_corr_win[i_count_win];
+        i_count_win++;
+        xbj_diff=abs(xtemp-xbj_table_win);
+       if (xbj_diff<=xbj_comp ){
+        xbj_comp=xbj_diff;
+        Q2_diff=abs(Q2temp-Q2_table_win);
+        if(Q2_diff<Q2_comp)
+        {Q2_comp=Q2_diff;
+         xbj_table_4=xbj_table_win;
+         Q2_table_4=Q2_table_win; 
+         rad_corr_temp4=rad_corr_table_win;
+         c_win_4=i_count_win-1;//index of nearest grid point,then set row values to zero
+         }
+        }
+      }       
+      
+        
+
+//[determine order of four points]
+double fll,fhl,flh,fhh;
+double xl,xh,yl,yh;//fll to xl; fhl to yl; flh to yh; fhh to xh
+double x0,y0;
+x0=xtemp;
+y0=Q2temp;
+fll=rad_corr_temp1;
+fhl=rad_corr_temp2;
+flh=rad_corr_temp3;
+fhh=rad_corr_temp4;
+xl=xbj_table_1;
+yl=Q2_table_2;
+yh=Q2_table_3;
+xh=xbj_table_4;
+
+
+
+//[2d bilinear interpolation]  
+
+	 // weight factors for interpolation 
+	 double xwl  = (x0-xl)/(xh-xl);
+	 double xwh  = (xh-x0)/(xh-xl);
+	 double ywl  = (y0-yl)/(yh-yl);
+	 double ywh  = (yh-y0)/(yh-yl);
+ // put everything together 
+	 double F00 = ywh*(xwh*fll + xwl*fhl) + ywl*(xwh*flh + xwl*fhh);
+ 
+rad_corr_temp=F00;
+return rad_corr_temp;
+}
+
+
 
 #ifdef SHMSXSTree_Debug 
   if(SHMSXSTree_Debug>=5) {
