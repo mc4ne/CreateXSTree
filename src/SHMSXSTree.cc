@@ -251,8 +251,8 @@ void SHMSXSTree::Run(int nevents_to_process)
       //get rad_corr=xs_born/xs_rad from table
 
   Data_file_name="empty_hms_down_win.dat";
-  xtemp=0.783;
-  Q2temp=10.13;
+  xtemp=xbj;
+  Q2temp=Q2;
   rad_corr_down=Xsec_table_read(Data_file_name,xtemp,Q2temp);
   Data_file_name="empty_hms_up_win.dat";
   rad_corr_up=Xsec_table_read(Data_file_name,xtemp,Q2temp);
